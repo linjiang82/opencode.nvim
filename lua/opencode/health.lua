@@ -21,7 +21,8 @@ function M.check()
 
   vim.health.info("`vim.g.opencode_opts`: " .. (vim.g.opencode_opts and vim.inspect(vim.g.opencode_opts) or "`nil`"))
 
-  if require("opencode.config").opts.events.reload and not vim.o.autoread then
+  local opts = require("opencode.config").opts
+  if opts.events.reload and not vim.o.autoread then
     vim.health.warn(
       "`opts.events.reload = true` but `vim.o.autoread = false`: files edited by `opencode` won't be automatically reloaded in buffers.",
       {
@@ -83,7 +84,8 @@ function M.check()
   end
 
   -- Binaries for auto-finding `opencode` process (Unix only)
-  if vim.fn.has("win32") == 0 and (not vim.g.opencode_opts or not vim.g.opencode_opts.server.port) then
+  local has_port_configured = opts and opts.server and opts.server.port
+  if vim.fn.has("win32") == 0 and not has_port_configured then
     if vim.fn.executable("pgrep") == 1 then
       vim.health.ok("`pgrep` available.")
     else
