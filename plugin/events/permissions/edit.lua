@@ -54,13 +54,21 @@ vim.api.nvim_create_autocmd("User", {
         diff_tabpage = vim.api.nvim_get_current_tabpage()
         current_edit_request_id = event.properties.id
 
-        -- Override native accept/reject keymaps to reject the edit as a whole first
+        -- Override native accept/reject keymaps to reject the edit as a whole first, if it hasn't been already
         vim.keymap.set("n", "dp", function()
-          require("opencode.cli.client").permit(port, event.properties.id, "reject")
+          if current_edit_request_id then
+            -- Clear so we don't close the tabpage in the "permission.replied" handler
+            -- and user can continue accepting/rejecting individual hunks (and then close the tabpage manually)
+            current_edit_request_id = nil
+            require("opencode.cli.client").permit(port, event.properties.id, "reject")
+          end
           return "dp"
         end, { buffer = true, desc = "Accept opencode edit hunk", expr = true })
         vim.keymap.set("n", "do", function()
-          require("opencode.cli.client").permit(port, event.properties.id, "reject")
+          if current_edit_request_id then
+            current_edit_request_id = nil
+            require("opencode.cli.client").permit(port, event.properties.id, "reject")
+          end
           return "do"
         end, { buffer = true, desc = "Reject opencode edit hunk", expr = true })
         -- Accept/reject edit as a whole
@@ -70,7 +78,7 @@ vim.api.nvim_create_autocmd("User", {
         vim.keymap.set("n", "dr", function()
           require("opencode.cli.client").permit(port, event.properties.id, "reject")
         end, { buffer = true, desc = "Reject opencode edit" })
-        -- Close diff without accepting/rejecting
+        -- Close diff
         vim.keymap.set("n", "q", function()
           vim.cmd("tabclose")
           current_edit_request_id = nil
@@ -78,6 +86,7 @@ vim.api.nvim_create_autocmd("User", {
         end, { buffer = true, desc = "Close opencode edit diff" })
       end)
     elseif event.type == "permission.replied" and current_edit_request_id == event.properties.requestID then
+      -- Entire edit was accepted or rejected, either in the plugin or TUI; close the diff
       current_edit_request_id = nil
       if diff_tabpage and vim.api.nvim_tabpage_is_valid(diff_tabpage) then
         vim.api.nvim_set_current_tabpage(diff_tabpage)

@@ -11,7 +11,8 @@ Integrate the [opencode](https://github.com/sst/opencode) AI assistant with Neov
 - Input prompts with completions, highlights, and normal-mode support
 - Select prompts from a library and define your own
 - Execute commands
-- Monitor and respond to events (edits, permissions, etc.) in real-time
+- Monitor and respond to events
+- View, accept or reject, and reload edits
 - Interact with `opencode` via an in-process LSP
 - _Vim-y_ — supports ranges and dot-repeat
 - Simple, sensible defaults to get you started quickly
@@ -244,10 +245,10 @@ Command `opencode`:
 
 `opencode.nvim` provides an in-process LSP to interact with `opencode` via the LSP functions you're used to!
 
-| LSP Function | `opencode.nvim` Handler                                                 |
-| ------------ | ----------------------------------------------------------------------- |
-| Hover        | Asks `opencode` for a brief explanation of the symbol under the cursor. |
-| Code Actions | Asks `opencode` to explain or fix diagnostics under the cursor.         |
+| LSP Function | `opencode.nvim` Handler                                                |
+| ------------ | ---------------------------------------------------------------------- |
+| Hover        | Asks `opencode` for a brief explanation of the symbol under the cursor |
+| Code Actions | Asks `opencode` to explain or fix diagnostics under the cursor         |
 
 ## 👀 Events
 
@@ -283,15 +284,16 @@ When `opencode` requests a permission, `opencode.nvim` waits for idle to ask you
 
 #### Edits
 
-For edit requests, `opencode.nvim` opens the target file in a new tab and uses Neovim's `:diffpatch` command to display the proposed changes side-by-side. See `:h 'diffopt'` for customization.
+For edit requests, `opencode.nvim` opens the target file in a new tab and uses Neovim's `:diffpatch` to display the proposed changes side-by-side. See `:h 'diffopt'` for customization.
 
-| Keymap | Function                                                                    |
-| ------ | --------------------------------------------------------------------------- |
-| `dp`   | Natively accept only the hunk under the cursor, and reject the edit request |
-| `do`   | Natively reject only the hunk under the cursor, and reject the edit request |
-| `da`   | Accept the entire edit request                                              |
-| `dr`   | Reject the entire edit request                                              |
-| `q`    | Close the diff without accepting or rejecting                               |
+| Keymap  | Function                                                                      |
+| ------- | ----------------------------------------------------------------------------- |
+| `da`    | Accept the entire edit request                                                |
+| `dr`    | Reject the entire edit request                                                |
+| `]c/[c` | Next/prev change                                                              |
+| `dp`    | Natively accept _only_ the hunk under the cursor, and reject the edit request |
+| `do`    | Natively reject _only_ the hunk under the cursor, and reject the edit request |
+| `q`     | Close the diff                                                                |
 
 ### Statusline
 
