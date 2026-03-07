@@ -281,6 +281,18 @@ When `opencode` edits a file, `opencode.nvim` automatically reloads the correspo
 
 When `opencode` requests a permission, `opencode.nvim` waits for idle to ask you to approve or deny it.
 
+#### Edits
+
+For edit requests, `opencode.nvim` opens the target file in a new tab and uses Neovim's `:diffpatch` command to display the proposed changes side-by-side. See `:h 'diffopt'` for customization.
+
+| Keymap | Function                                                                    |
+| ------ | --------------------------------------------------------------------------- |
+| `dp`   | Natively accept only the hunk under the cursor, and reject the edit request |
+| `do`   | Natively reject only the hunk under the cursor, and reject the edit request |
+| `da`   | Accept the entire edit request                                              |
+| `dr`   | Reject the entire edit request                                              |
+| `q`    | Close the diff without accepting or rejecting                               |
+
 ### Statusline
 
 ```lua

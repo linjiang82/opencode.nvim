@@ -16,4 +16,36 @@ function M.check_system_call(obj, cmd)
   end
 end
 
+---@param delay_ms number
+---@param callback function
+function M.on_user_idle(delay_ms, callback)
+  local idle_timer = vim.uv.new_timer()
+  if not idle_timer then
+    vim.notify("Failed to create idle timer for opencode permissions", vim.log.levels.ERROR, { title = "opencode" })
+    return
+  end
+
+  local key_listener_id = nil
+
+  local function on_idle()
+    idle_timer:stop()
+    idle_timer:close()
+    vim.on_key(nil, key_listener_id)
+
+    callback()
+  end
+
+  local function reset_idle_timer()
+    idle_timer:stop()
+    idle_timer:start(delay_ms, 0, vim.schedule_wrap(on_idle))
+  end
+
+  key_listener_id = vim.on_key(function()
+    reset_idle_timer()
+  end)
+
+  -- Start the initial timer
+  reset_idle_timer()
+end
+
 return M
