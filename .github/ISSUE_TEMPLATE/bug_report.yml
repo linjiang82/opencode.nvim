@@ -22,6 +22,8 @@ body:
           required: true
         - label: I have searched the existing [opencode issues](https://github.com/sst/opencode/issues)
           required: true
+        - label: I am using the latest version of the plugin
+          required: true
   - type: input
     attributes:
       label: "`:checkhealth opencode` output"
