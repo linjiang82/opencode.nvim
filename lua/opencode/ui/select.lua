@@ -29,14 +29,11 @@ function M.select(opts)
   local context = require("opencode.context").new()
   local Promise = require("opencode.promise")
 
-  return require("opencode.cli.server")
+  return require("opencode.server")
     .get()
-    :next(function(server) ---@param server opencode.cli.server.Server
+    :next(function(server) ---@param server opencode.server.Server
       local prompts = require("opencode.config").opts.prompts or {}
       local commands = require("opencode.config").opts.select.sections.commands or {}
-      for _, command in ipairs(server.custom_commands) do
-        commands[command.name] = command.description
-      end
 
       ---@class opencode.select.Item : snacks.picker.finder.Item, { __type: "prompt" | "command" | "server", ask?: boolean, submit?: boolean }
       local items = {}

@@ -127,7 +127,7 @@ end
 
 ---Render `opts.contexts` in `prompt`.
 ---@param prompt string
----@param agents opencode.cli.client.Agent[]
+---@param agents opencode.server.Agent[]
 ---@return { input: snacks.picker.Text[], output: snacks.picker.Text[] }
 function Context:render(prompt, agents)
   local contexts = require("opencode.config").opts.contexts or {}

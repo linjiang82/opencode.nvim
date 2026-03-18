@@ -38,7 +38,7 @@ function M.statusline()
   return M.statusline_icon() .. (port and (" :" .. tostring(port)) or "")
 end
 
----@param event opencode.cli.client.Event
+---@param event opencode.server.Event
 function M.update(event)
   if
     event.type == "server.connected"

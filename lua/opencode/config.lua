@@ -14,7 +14,7 @@ vim.g.opencode_opts = vim.g.opencode_opts
 ---@class opencode.Opts
 ---
 ---Where to look for an `opencode` server, and optionally how to manage one.
----@field server? opencode.cli.server.Opts
+---@field server? opencode.server.Opts
 ---
 ---Contexts to inject into prompts, keyed by their placeholder.
 ---@field contexts? table<string, fun(context: opencode.Context): string|nil>

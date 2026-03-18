@@ -1,8 +1,8 @@
 local M = {}
 
----@return opencode.cli.process.Process[]
+---@return opencode.server.process.Process[]
 function M.get()
-  assert(vim.fn.has("win32") == 1, "`opencode.cli.process.windows.get` should only be called on Windows")
+  assert(vim.fn.has("win32") == 1, "`opencode.server.process.windows.get` should only be called on Windows")
 
   local ps_script = [[
 Get-Process -Name '*opencode*' -ErrorAction SilentlyContinue |

@@ -12,10 +12,12 @@ vim.api.nvim_create_autocmd("User", {
   group = vim.api.nvim_create_augroup("OpencodeEdits", { clear = true }),
   pattern = { "OpencodeEvent:permission.asked", "OpencodeEvent:permission.replied" },
   callback = function(args)
-    ---@type opencode.cli.client.Event
+    ---@type opencode.server.Event
     local event = args.data.event
     ---@type number
     local port = args.data.port
+    ---@type opencode.server.Server
+    local server = require("opencode.server").new(port)
 
     local opts = require("opencode.config").opts.events.permissions or {}
     if not opts.enabled or not opts.edits.enabled then
@@ -65,23 +67,23 @@ vim.api.nvim_create_autocmd("User", {
             -- Clear so we don't close the tabpage in the "permission.replied" handler
             -- and user can continue accepting/rejecting individual hunks (and then close the tabpage manually)
             current_edit_request_id = nil
-            require("opencode.cli.client").permit(port, event.properties.id, "reject")
+            server:permit(event.properties.id, "reject")
           end
           return "dp"
         end, { buffer = true, desc = "Accept opencode edit hunk", expr = true })
         vim.keymap.set("n", "do", function()
           if current_edit_request_id then
             current_edit_request_id = nil
-            require("opencode.cli.client").permit(port, event.properties.id, "reject")
+            server:permit(event.properties.id, "reject")
           end
           return "do"
         end, { buffer = true, desc = "Reject opencode edit hunk", expr = true })
         -- Accept/reject edit as a whole
         vim.keymap.set("n", "da", function()
-          require("opencode.cli.client").permit(port, event.properties.id, "once")
+          server:permit(event.properties.id, "once")
         end, { buffer = true, desc = "Accept opencode edit" })
         vim.keymap.set("n", "dr", function()
-          require("opencode.cli.client").permit(port, event.properties.id, "reject")
+          server:permit(event.properties.id, "reject")
         end, { buffer = true, desc = "Reject opencode edit" })
         -- Close diff
         vim.keymap.set("n", "q", function()

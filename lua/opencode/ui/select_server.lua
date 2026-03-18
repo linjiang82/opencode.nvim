@@ -28,8 +28,8 @@ end
 
 ---Select an `opencode` server from a given list.
 ---
----@param servers opencode.cli.server.Server[]
----@return Promise<opencode.cli.server.Server>
+---@param servers opencode.server.Server[]
+---@return Promise<opencode.server.Server>
 function M.select_server(servers)
   local nvim_cwd = vim.fn.getcwd()
 
@@ -45,7 +45,7 @@ function M.select_server(servers)
 
   local picker_opts = {
     prompt = "Select an `opencode` server:",
-    format_item = function(server) ---@param server opencode.cli.server.Server
+    format_item = function(server) ---@param server opencode.server.Server
       return string.format("%s | %s | %d", server.title or "<No sessions>", server.cwd, server.port)
     end,
     snacks = {

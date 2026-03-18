@@ -48,7 +48,6 @@ end
 ---
 --- - Prompts
 --- - Commands
----   - Fetches custom commands from `opencode`
 --- - Server controls
 ---
 --- Highlights and previews items when using `snacks.picker`.
@@ -66,8 +65,8 @@ end
 M.select_session = function()
   return require("opencode.ui.select_session")
     .select_session()
-    :next(function(result) ---@param result { port: number, session: opencode.cli.client.Session }
-      require("opencode.cli.client").select_session(result.port, result.session.id)
+    :next(function(result) ---@param result { session: opencode.server.Session, server: opencode.server.Server }
+      result.server:select_session(result.session.id)
     end)
     :catch(function(err)
       if err then
@@ -80,12 +79,12 @@ end
 ---sending future requests to it and subscribing to its events.
 M.select_server = function()
   -- Should we also offer connected and configured server here?
-  return require("opencode.cli.server")
+  return require("opencode.server")
     .get_all()
-    :next(function(servers) ---@param servers opencode.cli.server.Server[]
+    :next(function(servers) ---@param servers opencode.server.Server[]
       return require("opencode.ui.select_server").select_server(servers)
     end)
-    :next(function(server) ---@param server opencode.cli.server.Server
+    :next(function(server) ---@param server opencode.server.Server
       require("opencode.events").connect(server)
       return server
     end)

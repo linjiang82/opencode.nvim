@@ -197,7 +197,6 @@ Select from all `opencode.nvim` functionality.
 
 - Prompts
 - Commands
-  - Fetches custom commands from `opencode`
 - Server controls
 
 Highlights and previews items when using `snacks.picker`.
@@ -259,7 +258,7 @@ Command `opencode`:
 vim.api.nvim_create_autocmd("User", {
   pattern = "OpencodeEvent:*", -- Optionally filter event types
   callback = function(args)
-    ---@type opencode.cli.client.Event
+    ---@type opencode.server.Event
     local event = args.data.event
     ---@type number
     local port = args.data.port

@@ -21,13 +21,11 @@ local M = {}
 
 ---Send a command to `opencode`.
 ---
----@param command opencode.Command|string The command to send. Can be built-in or reference your custom commands.
+---@param command opencode.Command|string The command to send.
 ---@return Promise
 function M.command(command)
-  return require("opencode.cli.server").get():next(function(server) ---@param server opencode.cli.server.Server
-    -- TODO: Use `on_error` callbacks to reject?
-    -- Rather than rely on non-obvious notifying lower down.
-    require("opencode.cli.client").tui_execute_command(command, server.port)
+  return require("opencode.server").get():next(function(server) ---@param server opencode.server.Server
+    server:tui_execute_command(command)
   end)
 end
 

@@ -10,40 +10,39 @@ local function ellipsize(s, max_len)
   return truncated .. "..."
 end
 
----@return Promise<{ session: opencode.cli.client.Session, port: number }>
+---@return Promise<{ session: opencode.server.Session, server: opencode.server.Server }>
 function M.select_session()
-  return require("opencode.cli.server")
+  return require("opencode.server")
     .get()
-    :next(function(server) ---@param server opencode.cli.server.Server
-      return server.port
-    end)
-    :next(function(port) ---@param port number
+    :next(function(server) ---@param server opencode.server.Server
       return require("opencode.promise").new(function(resolve)
-        require("opencode.cli.client").get_sessions(port, function(sessions)
-          resolve({ sessions = sessions, port = port })
+        server:get_sessions(function(sessions)
+          resolve({ sessions = sessions, server = server })
         end)
       end)
     end)
-    :next(function(session_data) ---@param session_data {sessions: opencode.cli.client.Session[], port: number}
-      local sessions = session_data.sessions
-      table.sort(sessions, function(a, b)
-        return a.time.updated > b.time.updated
-      end)
+    :next(
+      function(session_data) ---@param session_data {sessions: opencode.server.Session[], server: opencode.server.Server }
+        local sessions = session_data.sessions
+        table.sort(sessions, function(a, b)
+          return a.time.updated > b.time.updated
+        end)
 
-      return require("opencode.promise")
-        .select(sessions, {
-          prompt = "Select session (recently updated first):",
-          format_item = function(item)
-            local title_length = 60
-            local updated = os.date("%b %d, %Y %H:%M:%S", item.time.updated / 1000)
-            local title = ellipsize(item.title, title_length)
-            return ("%s%s%s"):format(title, string.rep(" ", title_length - #title), updated)
-          end,
-        })
-        :next(function(choice)
-          return { session = choice, port = session_data.port }
-        end)
-    end)
+        return require("opencode.promise")
+          .select(sessions, {
+            prompt = "Select session (recently updated first):",
+            format_item = function(item)
+              local title_length = 60
+              local updated = os.date("%b %d, %Y %H:%M:%S", item.time.updated / 1000)
+              local title = ellipsize(item.title, title_length)
+              return ("%s%s%s"):format(title, string.rep(" ", title_length - #title), updated)
+            end,
+          })
+          :next(function(choice)
+            return { session = choice, server = session_data.server }
+          end)
+      end
+    )
 end
 
 return M

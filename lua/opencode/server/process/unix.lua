@@ -43,9 +43,9 @@ local function get_ports(pids)
   return pids_to_ports
 end
 
----@return opencode.cli.process.Process[]
+---@return opencode.server.process.Process[]
 function M.get()
-  assert(vim.fn.has("unix") == 1, "`opencode.cli.process.unix.get` should only be called on Unix-like systems")
+  assert(vim.fn.has("unix") == 1, "`opencode.server.process.unix.get` should only be called on Unix-like systems")
 
   -- Find PIDs by command line pattern.
   -- Filter by `--port` because it's required to expose the server.
@@ -62,7 +62,7 @@ function M.get()
   end
 
   local pids_to_ports = get_ports(pids)
-  ---@type opencode.cli.process.Process[]
+  ---@type opencode.server.process.Process[]
   local processes = {}
   for pid, port in pairs(pids_to_ports) do
     table.insert(processes, { pid = pid, port = port })

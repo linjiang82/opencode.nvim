@@ -22,30 +22,30 @@ function M.prompt(prompt, opts)
   }
 
   local Promise = require("opencode.promise")
-  return require("opencode.cli.server")
+  return require("opencode.server")
     .get()
-    :next(function(server) ---@param server opencode.cli.server.Server
+    :next(function(server) ---@param server opencode.server.Server
       if opts.clear then
         return Promise.new(function(resolve)
-          require("opencode.cli.client").tui_execute_command("prompt.clear", server.port, function()
+          server:tui_execute_command("prompt.clear", function()
             resolve(server)
           end)
         end)
       end
       return server
     end)
-    :next(function(server) ---@param server opencode.cli.server.Server
+    :next(function(server) ---@param server opencode.server.Server
       local rendered = opts.context:render(prompt, server.subagents)
       local plaintext = opts.context.plaintext(rendered.output)
       return Promise.new(function(resolve)
-        require("opencode.cli.client").tui_append_prompt(plaintext, server.port, function()
+        server:tui_append_prompt(plaintext, function()
           resolve(server)
         end)
       end)
     end)
-    :next(function(server) ---@param server opencode.cli.server.Server
+    :next(function(server) ---@param server opencode.server.Server
       if opts.submit then
-        require("opencode.cli.client").tui_execute_command("prompt.submit", server.port)
+        server:tui_execute_command("prompt.submit")
       end
     end)
     :next(function()
