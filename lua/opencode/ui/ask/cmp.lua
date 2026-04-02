@@ -8,21 +8,10 @@ local ms = vim.lsp.protocol.Methods
 ---@param params lsp.InitializeParams
 ---@param callback fun(err?: lsp.ResponseError, result: lsp.InitializeResult)
 handlers[ms.initialize] = function(params, callback)
-  local config = require("opencode.config")
-  -- Parse `opts.context` to return all non-alphanumeric first characters in placeholders
-  local trigger_chars = {}
-  for placeholder, _ in pairs(config.opts.contexts or {}) do
-    local first_char = placeholder:sub(1, 1)
-    if not first_char:match("%w") and not vim.tbl_contains(trigger_chars, first_char) then
-      table.insert(trigger_chars, first_char)
-    end
-  end
-
   callback(nil, {
     capabilities = {
       completionProvider = {
         resolveProvider = true,
-        triggerCharacters = trigger_chars,
       },
     },
     serverInfo = {
