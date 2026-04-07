@@ -9,7 +9,10 @@ local bufnr
 ---@param cmd string
 ---@param opts? opencode.terminal.Opts
 function M.toggle(cmd, opts)
-  opts = opts or {}
+  opts = opts or {
+    split = "right",
+    width = math.floor(vim.o.columns * 0.35),
+  }
 
   if winid ~= nil and vim.api.nvim_win_is_valid(winid) then
     vim.api.nvim_win_hide(winid)
@@ -30,7 +33,10 @@ function M.open(cmd, opts)
     return
   end
 
-  opts = opts or {}
+  opts = opts or {
+    split = "right",
+    width = math.floor(vim.o.columns * 0.35),
+  }
 
   local previous_win = vim.api.nvim_get_current_win()
   bufnr = vim.api.nvim_create_buf(false, false)
