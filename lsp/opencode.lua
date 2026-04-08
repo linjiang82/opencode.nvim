@@ -10,12 +10,12 @@
 ---
 ---@field handlers? opencode.lsp.Handlers
 
----Customize the LSP's handlers. These are the core of the integration, defining how the LSP responds to various requests from the editor.
+---Customize the LSP's handlers, defining how it responds to requests from the editor.
 ---@class opencode.lsp.Handlers
 ---
----@field hover? opencode.lsp.handlers.hover.Opts
----
 ---@field code_action? opencode.lsp.handlers.code_action.Opts
+---
+---@field hover? opencode.lsp.handlers.hover.Opts
 
 ---@class opencode.lsp.handlers.code_action.Opts
 ---
@@ -161,27 +161,41 @@ handlers[ms.textDocument_hover] = function(params, callback)
     -- "```",
     "Explain the symbol.",
     "Use the surrounding code as clues to its specific purpose in this code.",
-    "Keep your response concise.",
-    "Your response will be used directly as the LSP hover documentation.",
-    "DO NOT restate the code or symbol name or location.",
-    "DO NOT explain your thought process.",
-    "ONLY provide the explanation.",
+    "Prioritize a speedy and concise response.",
+    "Your response will be used directly as the LSP hover documentation, so:",
+    "- DO NOT restate the code or symbol name or location.",
+    "- DO NOT explain your thought process.",
+    "- Provide ONLY your explanation.",
   }
 
   local cmd = {
     "opencode",
     "run",
   }
+
+  -- Check connected server directly rather than `server.get()`.
+  -- The latter is disruptive when it doesn't find an obvious match and prompts for selection.
+  -- We could use it if it allowed configuring its methods.
+  local connected_server = require("opencode.events").connected_server
+  if connected_server then
+    -- Attach to bypass cold-start.
+    -- But we still use `opencode run` instead of `prompt()` because this is a one-off,
+    -- and shouldn't be added to current session.
+    table.insert(cmd, "--attach")
+    table.insert(cmd, "http://localhost:" .. connected_server.port)
+  end
+
   local configured_model = require("opencode.config").opts.lsp.handlers.hover.model
   if configured_model then
     table.insert(cmd, "--model")
     table.insert(cmd, configured_model)
   end
+
   table.insert(cmd, table.concat(prompt, "\n"))
 
   local job = vim.system(cmd, nil, function(obj)
     if obj.signal == 15 then
-      -- Terminated by user moving away from the hover; do nothing
+      -- Terminated by us because user moved away from the hover; do nothing
       return
     end
 
@@ -197,16 +211,16 @@ handlers[ms.textDocument_hover] = function(params, callback)
       end)
     else
       memoized_hover_results[location] = output
-      -- Re-trigger hover to show the result; LSP doesn't support progressive hover results
+      -- HACK: Re-trigger hover to show the result; LSP doesn't support progressive hover updates
       vim.schedule(function()
         -- Move the cursor to close the original hover; otherwise it just focuses it
         vim.api.nvim_feedkeys(
-          vim.api.nvim_replace_termcodes(params.position.character > 0 and "<Left>" or "<Right>", true, false, true),
-          "n",
-          true
-        )
-        vim.api.nvim_feedkeys(
-          vim.api.nvim_replace_termcodes(params.position.character > 0 and "<Right>" or "<Left>", true, false, true),
+          vim.api.nvim_replace_termcodes(
+            params.position.character > 0 and "<Left><Right>" or "<Right><Left>",
+            true,
+            false,
+            true
+          ),
           "n",
           true
         )
@@ -215,7 +229,7 @@ handlers[ms.textDocument_hover] = function(params, callback)
       end)
     end
   end)
-  -- Don't re-trigger hover with completed results if the user has moved the cursor; would be confusing.
+  -- Don't re-trigger hover with completed results if the user has moved (closing it)
   local key_listener_id
   key_listener_id = vim.on_key(function()
     job:kill(15)
